@@ -20,6 +20,15 @@ REPOSITORIES = (
     '../labs',
     '../web',
     '../translator',
+    '../base62',
+    '../clare',
+    '../gitstat',
+    '../mendel',
+    '../scalable-appliance',
+    '../secondary-brain',
+
+    '../../smartrek/smartrek-android',
+    '../../smartrek/smartrek-experiments',
 )
 
 def generate_git_log(path):
@@ -29,7 +38,7 @@ def generate_git_log(path):
     return subprocess.check_output(['git', 'log', '--pretty=format:%an|%ae|%ad'], cwd=abs_path) + '\n'
 
 
-def parse_log(log):
+def parse_log(log, year=2012):
     """
     :param log: raw log
     :type log: str
@@ -45,17 +54,19 @@ def parse_log(log):
 
         # day of the year
         timetuple = timestamp.timetuple()
-        year = timetuple.tm_year
-        yday = timetuple.tm_yday
+        if timetuple.tm_year == year:
+            key = timetuple.tm_yday
 
-        key = (year, yday)
+            if not key in daily_commits:
+                daily_commits[key] = 1
+            else:
+                daily_commits[key] += 1
 
-        if not key in daily_commits:
-            daily_commits[key] = 1
-        else:
-            daily_commits[key] += 1
+    max_commits = max(daily_commits.values())
 
-    return daily_commits
+    return {'year': year,
+        'max_commits': max_commits,
+        'daily_commits': daily_commits}
 
 
 def make_svg_report(log):
@@ -64,6 +75,9 @@ def make_svg_report(log):
     :type log: dict
     """
 
+    def make_colorcode(color):
+        return '%02x%02x%02x' % color
+
     print '<?xml version="1.0" encoding="utf-8"?>'
     print '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd" ['
     print '  <!ENTITY st0 "fill-rule:evenodd;clip-rule:evenodd;fill:#000000;">'
@@ -71,10 +85,24 @@ def make_svg_report(log):
     print ']>'
     print '<svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="667px" height="107px" viewBox="0 0 667 107" style="enable-background:new 0 0 667 107;" xml:space="preserve">'
 
+    max_commits = log['max_commits']
+    daily_commits = log['daily_commits']
+
     for week in range(52):
         print '<g transform="translate(%d, 0)">' % (week*12)
         for day in range(7):
-            print '<rect class="day" width="10px" height="10px" y="%d" style="fill: #eeeeee"/>' % (day*12)
+            count = 0
+            try:
+                count = daily_commits[week*7 + day]
+            except:
+                pass
+
+            density = float(count + 5) / (max_commits + 5) if count > 0 else 0.0
+
+            color = (238 - density*180, 238 - density*140, 238)
+
+            print '<rect class="day" width="10px" height="10px" y="%d" style="fill: #%s"/>' \
+                % (day*12, make_colorcode(color))
         print '</g>'
 
     print '</svg>'
