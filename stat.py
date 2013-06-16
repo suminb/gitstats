@@ -15,21 +15,15 @@ logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
 
-REPOSITORIES = (
-    '../hanja',
-    '../labs',
-    '../web',
-    '../translator',
-    '../base62',
-    '../clare',
-    '../gitstat',
-    '../mendel',
-    '../scalable-appliance',
-    '../secondary-brain',
+def discover_repositories(root_path):
+    repositories = []
+    for root, dirs, files in os.walk(root_path):
+        if os.path.exists('%s/.git' % root):
+            logger.info('Git repository discovered: %s' % root)
+            repositories.append(root)
 
-    '../../smartrek/smartrek-android',
-    '../../smartrek/smartrek-experiments',
-)
+    return repositories
+
 
 def generate_git_log(path):
     abs_path = os.path.abspath(path)
@@ -108,8 +102,10 @@ def make_svg_report(log):
     print '</svg>'
 
 def main():
+    repositories = discover_repositories(os.path.expanduser('~/dev'))
+    
     log = ''
-    for repo in REPOSITORIES:
+    for repo in repositories:
         log += generate_git_log(repo)
 
     parsed_log = parse_log(log)
