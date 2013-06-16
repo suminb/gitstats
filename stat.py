@@ -17,7 +17,7 @@ EMAIL = 'suminb@gmail.com'
 def discover_repositories(root_path):
     repositories = []
     for root, dirs, files in os.walk(root_path):
-        if os.path.exists('%s/.git' % root):
+        if os.path.exists('%s/.git' % root) and not os.path.exists('%s/.exclude' % root):
             logger.info('Git repository discovered: %s' % root)
             repositories.append(root)
 
@@ -31,23 +31,13 @@ def generate_git_log(path):
     return subprocess.check_output(['git', 'log', '--pretty=format:%an|%ae|%ad'], cwd=abs_path) + '\n'
 
 
-def parse_log(log, year=2012):
-    """
-    :param log: raw log
-    :type log: str
-    """
+def process_log(logs, year):
     daily_commits_mine = {}
     daily_commits_others = {}
 
-    for line in log.strip().split('\n'):
-        # split columns
-        name, email, timestamp = line.split('|')
-
-        # parse datetime
-        timestamp = parse_datetime(timestamp)
-
-        # day of the year
-        timetuple = timestamp.timetuple()
+    for log in logs:
+        email = log[1]
+        timetuple = log[2].timetuple()
         if timetuple.tm_year == year:
             key = timetuple.tm_yday
 
@@ -64,7 +54,8 @@ def parse_log(log, year=2012):
                 else:
                     daily_commits_others[key] += 1
 
-    max_commits = max([max(daily_commits_mine.values()), max(daily_commits_others.values())])
+    #max_commits = max([max(daily_commits_mine.values()), max(daily_commits_others.values())])
+    max_commits = 30
 
     return {'year': year,
         'max_commits': max_commits,
@@ -72,7 +63,32 @@ def parse_log(log, year=2012):
         'daily_commits_others': daily_commits_others}
 
 
-def make_svg_report(log):
+def parse_log(log):
+    """
+    :param log: raw log
+    :type log: str
+    """
+    return map(lambda x: [x[0], x[1], parse_datetime(x[2])], \
+        [line.split('|') for line in log.strip().split('\n')])
+
+
+def sort_by_year(log):
+    basket = {}
+    for r in log:
+        name, email, timestamp = r
+
+        timetuple = timestamp.timetuple()
+        year = timetuple.tm_year
+
+        if year in basket:
+            basket[year].append(r)
+        else:
+            basket[year] = [r]
+
+    return basket
+
+
+def make_svg_report(log, out=sys.stdout):
     """
     :param log: parsed log
     :type log: dict
@@ -84,19 +100,19 @@ def make_svg_report(log):
     def make_colorcode(color):
         return '%02x%02x%02x' % tuple(color)
 
-    print '<?xml version="1.0" encoding="utf-8"?>'
-    print '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd" ['
-    print '  <!ENTITY st0 "fill-rule:evenodd;clip-rule:evenodd;fill:#000000;">'
-    print '  <!ENTITY st1 "fill:#000000;">'
-    print ']>'
-    print '<svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="667px" height="107px" viewBox="-10 -10 667 107" style="enable-background:new 0 0 667 107;" xml:space="preserve">'
+    out.write('<?xml version="1.0" encoding="utf-8"?>\n')
+    out.write('<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd" [\n')
+    out.write('  <!ENTITY st0 "fill-rule:evenodd;clip-rule:evenodd;fill:#000000;">\n')
+    out.write('  <!ENTITY st1 "fill:#000000;">\n')
+    out.write(']>\n')
+    out.write('<svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="667px" height="107px" viewBox="-10 -10 667 107" style="enable-background:new 0 0 667 107;" xml:space="preserve">\n')
 
     max_commits = log['max_commits']
     daily_commits_mine = log['daily_commits_mine']
     daily_commits_others = log['daily_commits_others']
 
     for week in range(52):
-        print '<g transform="translate(%d, 0)">' % (week*12)
+        out.write('<g transform="translate(%d, 0)">' % (week*12))
         for day in range(7):
             count_mine, count_others = 0, 0
             try:
@@ -114,11 +130,11 @@ def make_svg_report(log):
             color_mine = (238 - density_mine*180, 238 - density_mine*140, 238)
             color_others = (238, 238 - density_others*180, 238 - density_others*140)
 
-            print '<rect class="day" width="10px" height="10px" y="%d" style="fill: #%s"/>' \
-                % (day*12, make_colorcode(average_colors(color_mine, color_others)))
-        print '</g>'
+            out.write('<rect class="day" width="10px" height="10px" y="%d" style="fill: #%s"/>' \
+                % (day*12, make_colorcode(average_colors(color_mine, color_others))))
+        out.write('</g>')
 
-    print '</svg>'
+    out.write('</svg>')
 
 def main():
     repositories = discover_repositories(os.path.expanduser('~/dev'))
@@ -128,7 +144,14 @@ def main():
         log += generate_git_log(repo)
 
     parsed_log = parse_log(log)
-    make_svg_report(parsed_log)
+    log_by_year = sort_by_year(parsed_log)
+
+    for year in log_by_year:
+        data = process_log(log_by_year[year], year)
+
+        with open('%d.svg' % year, 'w') as f:
+            logger.info('Generating report for year %d' % year)
+            make_svg_report(data, f)
 
 
 if __name__ == '__main__':
