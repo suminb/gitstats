@@ -15,6 +15,9 @@ EMAIL = 'suminb@gmail.com'
 
 
 def discover_repositories(root_path):
+    """Discover git repositories under a given directory, excluding repositores that contain
+    a .exclude file."""
+
     repositories = []
     for root, dirs, files in os.walk(root_path):
         if os.path.exists('%s/.git' % root) and not os.path.exists('%s/.exclude' % root):
@@ -25,6 +28,9 @@ def discover_repositories(root_path):
 
 
 def generate_git_log(path):
+    """
+    :param path: an absolute or relative path of a git repository
+    """
     abs_path = os.path.abspath(path)
 
     logger.info('Analyzing %s' % abs_path)
@@ -54,8 +60,7 @@ def process_log(logs, year):
                 else:
                     daily_commits_others[key] += 1
 
-    #max_commits = max([max(daily_commits_mine.values()), max(daily_commits_others.values())])
-    max_commits = 30
+    max_commits = max([0] + daily_commits_mine.values() + daily_commits_others.values())
 
     return {'year': year,
         'max_commits': max_commits,
@@ -73,6 +78,10 @@ def parse_log(log):
 
 
 def sort_by_year(log):
+    """
+    :param log: parsed log
+    :type log: list
+    """
     basket = {}
     for r in log:
         name, email, timestamp = r
@@ -95,9 +104,16 @@ def make_svg_report(log, out=sys.stdout):
     """
 
     def average_colors(color1, color2):
+        """
+        :param color1: RGB tuple
+        :param color2: RGB tuple
+        """
         return map(lambda x: x/2, map(sum, zip(color1, color2)))
 
     def make_colorcode(color):
+        """
+        :param color: RGB tuple
+        """
         return '%02x%02x%02x' % tuple(color)
 
     out.write('<?xml version="1.0" encoding="utf-8"?>\n')
