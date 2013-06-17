@@ -125,9 +125,11 @@ def make_svg_report(log, global_max, out=sys.stdout):
     out.write(']>\n')
     out.write('<svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="667px" height="107px" viewBox="-10 -10 667 107" style="enable-background:new 0 0 667 107;" xml:space="preserve">\n')
 
-    #max_commits = log['max_commits']
     daily_commits_mine = log['daily_commits_mine']
     daily_commits_others = log['daily_commits_others']
+
+    # Gives clear distinction between no-commit day and a day with at least one commit
+    density_offset = global_max * 0.25
 
     for week in range(52):
         out.write('<g transform="translate(%d, 0)">' % (week*12))
@@ -142,8 +144,10 @@ def make_svg_report(log, global_max, out=sys.stdout):
             except:
                 pass
 
-            density_mine = float(count_mine + 5) / (global_max + 5) if count_mine > 0 else 0.0
-            density_others = float(count_others + 5) / (global_max + 5) if count_others > 0 else 0.0
+            density_mine = float(count_mine + density_offset) / (global_max + density_offset) \
+                if count_mine > 0 else 0.0
+            density_others = float(count_others + density_offset) / (global_max + density_offset) \
+                if count_others > 0 else 0.0
 
             color_mine = (238 - density_mine*180, 238 - density_mine*140, 238)
             color_others = (238, 238 - density_others*180, 238 - density_others*140)
