@@ -1,3 +1,6 @@
+
+__email__ = 'suminb@gmail.com'
+
 from dateutil.parser import parse as parse_datetime
 
 import subprocess
@@ -10,8 +13,6 @@ handler = logging.StreamHandler(sys.stderr)
 handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
-
-EMAIL = 'suminb@gmail.com'
 
 
 def discover_repositories(root_path):
@@ -47,7 +48,7 @@ def process_log(logs, year):
         if timetuple.tm_year == year:
             key = timetuple.tm_yday
 
-            is_mine = email == EMAIL
+            is_mine = email == __email__
 
             if is_mine:
                 if not key in daily_commits_mine:
@@ -97,10 +98,11 @@ def sort_by_year(log):
     return basket
 
 
-def make_svg_report(log, out=sys.stdout):
+def make_svg_report(log, global_max, out=sys.stdout):
     """
     :param log: parsed log
     :type log: dict
+    :param global_max: global maximum of the number of commits at any given day
     """
 
     def average_colors(color1, color2):
@@ -123,7 +125,7 @@ def make_svg_report(log, out=sys.stdout):
     out.write(']>\n')
     out.write('<svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="667px" height="107px" viewBox="-10 -10 667 107" style="enable-background:new 0 0 667 107;" xml:space="preserve">\n')
 
-    max_commits = log['max_commits']
+    #max_commits = log['max_commits']
     daily_commits_mine = log['daily_commits_mine']
     daily_commits_others = log['daily_commits_others']
 
@@ -140,8 +142,8 @@ def make_svg_report(log, out=sys.stdout):
             except:
                 pass
 
-            density_mine = float(count_mine + 5) / (max_commits + 5) if count_mine > 0 else 0.0
-            density_others = float(count_others + 5) / (max_commits + 5) if count_others > 0 else 0.0
+            density_mine = float(count_mine + 5) / (global_max + 5) if count_mine > 0 else 0.0
+            density_others = float(count_others + 5) / (global_max + 5) if count_others > 0 else 0.0
 
             color_mine = (238 - density_mine*180, 238 - density_mine*140, 238)
             color_others = (238, 238 - density_others*180, 238 - density_others*140)
@@ -151,6 +153,7 @@ def make_svg_report(log, out=sys.stdout):
         out.write('</g>')
 
     out.write('</svg>')
+
 
 def main():
     repositories = discover_repositories(os.path.expanduser('~/dev'))
@@ -162,12 +165,19 @@ def main():
     parsed_log = parse_log(log)
     log_by_year = sort_by_year(parsed_log)
 
+    max_commits = []
     for year in log_by_year:
         data = process_log(log_by_year[year], year)
+        max_commits.append(data['max_commits'])
 
+    global_max = max(max_commits)
+
+    # NOTE: Inefficient, but works
+    for year in log_by_year:
+        data = process_log(log_by_year[year], year)
         with open('%d.svg' % year, 'w') as f:
             logger.info('Generating report for year %d' % year)
-            make_svg_report(data, f)
+            make_svg_report(data, global_max, f)
 
 
 if __name__ == '__main__':
