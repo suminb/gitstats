@@ -16,8 +16,8 @@ logger.setLevel(logging.DEBUG)
 
 
 def discover_repositories(root_path):
-    """Discover git repositories under a given directory, excluding repositores that contain
-    a .exclude file."""
+    """Discover git repositories under a given directory, excluding repositores
+    that contain a .exclude file."""
 
     repositories = []
     for root, dirs, files in os.walk(root_path):
@@ -35,7 +35,8 @@ def generate_git_log(path):
     abs_path = os.path.abspath(path)
 
     logger.info('Analyzing %s' % abs_path)
-    return subprocess.check_output(['git', 'log', '--pretty=format:%an|%ae|%ad'], cwd=abs_path) + '\n'
+    return subprocess.check_output(['git', 'log',
+        '--pretty=format:%an|%ae|%ad'], cwd=abs_path) + '\n'
 
 
 def process_log(logs, year):
