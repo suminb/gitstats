@@ -1,5 +1,6 @@
-
+__author__ = 'Sumin Byeon'
 __email__ = 'suminb@gmail.com'
+__version__ = '0.1.1'
 
 from dateutil.parser import parse as parse_datetime
 
@@ -161,7 +162,7 @@ def make_svg_report(log, global_max, out=sys.stdout):
 
 
 def main():
-    repositories = discover_repositories(os.path.expanduser('~/dev'))
+    repositories = discover_repositories(os.path.expanduser(argv[1]))
 
     log = ''
     for repo in repositories:
