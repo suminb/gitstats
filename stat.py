@@ -162,7 +162,7 @@ def make_svg_report(log, global_max, out=sys.stdout):
 
 
 def main():
-    repositories = discover_repositories(os.path.expanduser(argv[1]))
+    repositories = discover_repositories(os.path.expanduser(sys.argv[1]))
 
     log = ''
     for repo in repositories:

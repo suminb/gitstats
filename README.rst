@@ -17,3 +17,6 @@ It may be a single Git repository.
 .. code-block:: console
     
     python stat.py ~/dev/projectx
+
+If you would like to exclude certain repositories, put a ``.exclude`` file in
+each directory you want to exclude from the statistics.
