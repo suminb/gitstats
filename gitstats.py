@@ -33,16 +33,19 @@ def discover_repositories(root_path):
     return repositories
 
 
-def generate_git_log(path):
-    """
+def generate_git_log(path, format='format:%an|%ae|%ad'):
+    """Get the entire commit logs in a raw string for a given repository.
+
     :param path: an absolute or relative path of a git repository
     """
     abs_path = os.path.abspath(path)
 
     logger.info('Analyzing %s' % abs_path)
-    return subprocess.check_output(
-        ['git', 'log', '--pretty=format:%an|%ae|%ad'],
-        cwd=abs_path).decode('utf-8') + '\n'
+    log_rows = subprocess.check_output(
+        ['git', 'log', '--pretty={}'.format(format)],
+        cwd=abs_path).decode('utf-8')
+
+    return [parse_log_row(row) for row in log_rows.strip().split('\n')]
 
 
 def process_log(logs, year):
@@ -84,13 +87,9 @@ def process_log(logs, year):
             'daily_commits_others': daily_commits_others}
 
 
-def parse_log(log):
-    """
-    :param log: raw log
-    :type log: str
-    """
-    return map(lambda x: [x[0], x[1], parse_datetime(x[2])],
-               [line.split('|') for line in log.strip().split('\n')])
+def parse_log_row(row):
+    columns = row.strip().split('|')
+    return columns[0], columns[1], parse_datetime(columns[2])
 
 
 def sort_by_year(log):
@@ -186,12 +185,11 @@ def cli():
 def analyze(path):
     repositories = discover_repositories(os.path.expanduser(path))
 
-    log = ''
+    logs = []
     for repo in repositories:
-        log += generate_git_log(repo)
+        logs += generate_git_log(repo)
 
-    parsed_log = parse_log(log)
-    log_by_year = sort_by_year(parsed_log)
+    log_by_year = sort_by_year(logs)
 
     max_commits = []
     for year in log_by_year:
