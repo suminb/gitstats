@@ -24,8 +24,9 @@ def discover_repositories(root_path):
 
     repositories = []
     for root, dirs, files in os.walk(root_path):
-        if os.path.exists('%s/.git' % root) and not os.path.exists('%s/.exclude' % root):
-            logger.info('Git repository discovered: %s' % root)
+        if os.path.exists(os.path.join(root, '.git')) and \
+                not os.path.exists(os.path.join(root, '.exclude')):
+            logger.info('Git repository discovered: {}'.format(root))
             repositories.append(root)
 
     return repositories
@@ -38,11 +39,13 @@ def generate_git_log(path):
     abs_path = os.path.abspath(path)
 
     logger.info('Analyzing %s' % abs_path)
-    return subprocess.check_output(['git', 'log',
-        '--pretty=format:%an|%ae|%ad'], cwd=abs_path).decode('utf-8') + '\n'
+    return subprocess.check_output(
+        ['git', 'log', '--pretty=format:%an|%ae|%ad'],
+        cwd=abs_path).decode('utf-8') + '\n'
 
 
 def process_log(logs, year):
+    """Filters out logs by the given year."""
     daily_commits_mine = {}
     daily_commits_others = {}
 
@@ -75,9 +78,9 @@ def process_log(logs, year):
         max_commits = max(max_commits, max(daily_commits_others.values()))
 
     return {'year': year,
-        'max_commits': max_commits,
-        'daily_commits_mine': daily_commits_mine,
-        'daily_commits_others': daily_commits_others}
+            'max_commits': max_commits,
+            'daily_commits_mine': daily_commits_mine,
+            'daily_commits_others': daily_commits_others}
 
 
 def parse_log(log):
@@ -85,8 +88,8 @@ def parse_log(log):
     :param log: raw log
     :type log: str
     """
-    return map(lambda x: [x[0], x[1], parse_datetime(x[2])], \
-        [line.split('|') for line in log.strip().split('\n')])
+    return map(lambda x: [x[0], x[1], parse_datetime(x[2])],
+               [line.split('|') for line in log.strip().split('\n')])
 
 
 def sort_by_year(log):
@@ -140,7 +143,8 @@ def make_svg_report(log, global_max, out=sys.stdout):
     daily_commits_mine = log['daily_commits_mine']
     daily_commits_others = log['daily_commits_others']
 
-    # Gives clear distinction between no-commit day and a day with at least one commit
+    # Gives clear distinction between no-commit day and a day with at least one
+    # commit
     density_offset = global_max * 0.25
 
     for week in range(52):
