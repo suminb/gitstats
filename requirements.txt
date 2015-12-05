@@ -1,2 +1,5 @@
 click
 python-dateutil
+pytest
+pytest-cov
+coveralls
