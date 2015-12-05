@@ -8,6 +8,7 @@ import os
 import sys
 import logging
 
+import click
 from dateutil.parser import parse as parse_datetime
 
 logger = logging.getLogger('gitstat')
@@ -175,8 +176,15 @@ def make_svg_report(log, global_max, out=sys.stdout):
     out.write('</svg>')
 
 
-def main():
-    repositories = discover_repositories(os.path.expanduser(sys.argv[1]))
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
+@click.argument('path', type=click.Path(exists=True))
+def analyze(path):
+    repositories = discover_repositories(os.path.expanduser(path))
 
     log = ''
     for repo in repositories:
@@ -201,4 +209,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    cli()
