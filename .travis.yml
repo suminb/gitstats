@@ -10,7 +10,7 @@ install:
 
 script:
   - export PYTHONPATH=$PYTHONPATH:.
-  - py.test --cov gitstats --durations=10
+  - py.test --cov gitstats --cov-report term-missing --durations=10
 
 after_success:
 - coveralls
