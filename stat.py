@@ -37,7 +37,7 @@ def generate_git_log(path):
 
     logger.info('Analyzing %s' % abs_path)
     return subprocess.check_output(['git', 'log',
-        '--pretty=format:%an|%ae|%ad'], cwd=abs_path) + '\n'
+        '--pretty=format:%an|%ae|%ad'], cwd=abs_path).decode('utf-8') + '\n'
 
 
 def process_log(logs, year):
@@ -53,17 +53,24 @@ def process_log(logs, year):
             is_mine = email == __email__
 
             if is_mine:
-                if not key in daily_commits_mine:
+                if key not in daily_commits_mine:
                     daily_commits_mine[key] = 1
                 else:
                     daily_commits_mine[key] += 1
             else:
-                if not key in daily_commits_others:
+                if key not in daily_commits_others:
                     daily_commits_others[key] = 1
                 else:
                     daily_commits_others[key] += 1
 
-    max_commits = max([0] + daily_commits_mine.values() + daily_commits_others.values())
+    # Calculate the maximum number of commits
+    max_commits = 0
+
+    if daily_commits_mine:
+        max_commits = max(max_commits, max(daily_commits_mine.values()))
+
+    if daily_commits_others:
+        max_commits = max(max_commits, max(daily_commits_others.values()))
 
     return {'year': year,
         'max_commits': max_commits,
@@ -112,7 +119,7 @@ def make_svg_report(log, global_max, out=sys.stdout):
         :param color1: RGB tuple
         :param color2: RGB tuple
         """
-        return map(lambda x: x/2, map(sum, zip(color1, color2)))
+        return map(lambda x: int(x / 2), map(sum, zip(color1, color2)))
 
     def make_colorcode(color):
         """
