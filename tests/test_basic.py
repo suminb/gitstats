@@ -8,8 +8,13 @@ def validate_log_row(columns):
     :param columns: (name, email, datetime) tuple
     """
     assert len(columns) == 3
-    assert isinstance(columns[0], str)
-    assert isinstance(columns[1], str)
+    for i in [0, 1]:
+        try:
+            # For Python 2.x
+            assert isinstance(columns[i], basestring)
+        except NameError:
+            assert isinstance(columns[i], str)
+
     assert isinstance(columns[2], datetime)
 
 
