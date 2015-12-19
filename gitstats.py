@@ -171,9 +171,11 @@ def make_svg_report(log, global_max, out=sys.stdout):
             except:
                 pass
 
-            density_mine = float(count_mine + density_offset) / (global_max + density_offset) \
+            denominator = float(global_max + density_offset)
+
+            density_mine = (count_mine + density_offset) / denominator \
                 if count_mine > 0 else 0.0
-            density_others = float(count_others + density_offset) / (global_max + density_offset) \
+            density_others = (count_others + density_offset) / denominator \
                 if count_others > 0 else 0.0
 
             color_mine = (238 - density_mine * 180, 238 - density_mine * 140, 238)
@@ -205,12 +207,15 @@ def analyze(path, year, out):
     log_by_year = sort_by_year(logs)
 
     max_commits = []
-    for year in log_by_year:
-        data = process_log(log_by_year[year], year)
+    for y in log_by_year:
+        data = process_log(log_by_year[y], y)
         max_commits.append(data['max_commits'])
 
+    if not year:
+        year = y
+    else:
+        year = int(year)
     global_max = max(max_commits)
-
     processed_logs = process_log(log_by_year[year], year)
     logger.info('Generating report for year {}'.format(year))
     if out:
