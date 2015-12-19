@@ -49,7 +49,17 @@ def generate_git_log(path, format='format:%an|%ae|%ad'):
 
 
 def process_log(logs, year):
-    """Filters out logs by the given year."""
+    """Filters out logs by the given year.
+
+    :param logs: A list of (name, email, datetime) tuples
+    :type logs: list
+
+    :type year: int
+
+    :return:
+        A dictionary containing information required to draw a commit graph.
+    :rtype: dict
+    """
     daily_commits_mine = {}
     daily_commits_others = {}
 
@@ -116,6 +126,7 @@ def make_svg_report(log, global_max, out=sys.stdout):
     """
     :param log: parsed log for a particular year
     :type log: dict
+
     :param global_max: global maximum of the number of commits at any given day
     :type global_max: int
     """
@@ -182,7 +193,9 @@ def cli():
 
 @cli.command()
 @click.argument('path', type=click.Path(exists=True))
-def analyze(path):
+@click.option('--year', type=str, help='Specify a year or \'all\'')
+@click.option('--out')
+def analyze(path, year, out):
     repositories = discover_repositories(os.path.expanduser(path))
 
     logs = []
@@ -198,13 +211,13 @@ def analyze(path):
 
     global_max = max(max_commits)
 
-    # NOTE: Inefficient, but works
-    for year in log_by_year:
-        data = process_log(log_by_year[year], year)
-        with open('%d.svg' % year, 'w') as f:
-            logger.info('Generating report for year %d' % year)
-            make_svg_report(data, global_max, f)
-
+    processed_logs = process_log(log_by_year[year], year)
+    logger.info('Generating report for year {}'.format(year))
+    if out:
+        with open(out, 'w') as fout:
+            make_svg_report(processed_logs, global_max, fout)
+    else:
+        make_svg_report(processed_logs, global_max)
 
 if __name__ == '__main__':
     cli()
