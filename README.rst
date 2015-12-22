@@ -1,7 +1,9 @@
 Gitstat
 =======
 
-Generating overall statistics for multiple git repositories
+Visualizes overall code commits for multiple Git repositories.
+
+.. image:: http://s1.postimg.org/mrnwnla3j/2014.png
 
 Usage
 -----
@@ -15,7 +17,7 @@ Discover all Git repositories in the home directory to generate statistics.
 It may be a single Git repository.
 
 .. code-block:: console
-    
+
     python stat.py ~/dev/projectx
 
 If you would like to exclude certain repositories, put a ``.exclude`` file in
