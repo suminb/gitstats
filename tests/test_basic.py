@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from gitstats import generate_git_log, parse_log_row, process_log, \
-    sort_by_year
+from gitstats import average_color, generate_git_log, parse_log_row, \
+    process_log, sort_by_year
 
 
 def validate_log_row(columns):
@@ -64,3 +64,13 @@ def test_process_log():
     assert logs2013['daily_commits_mine']
     assert logs2013['daily_commits_others'] == {}
     assert logs2013['max_commits'] > 0
+
+
+def test_average_color():
+    """Ensures average_color() works as intended."""
+    red = (255, 0, 0)
+    green = (0, 255, 0)
+    blue = (0, 0, 255)
+    assert (127, 127, 0) == average_color(red, green)
+    assert (127, 0, 127) == average_color(red, blue)
+    assert (0, 127, 127) == average_color(green, blue)

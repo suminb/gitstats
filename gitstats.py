@@ -122,6 +122,15 @@ def sort_by_year(log):
     return basket
 
 
+def average_color(color1, color2):
+    """
+    :param color1: An RGB tuple
+    :param color2: An RGB tuple
+    :return: An RGB tuple
+    """
+    return tuple(map(lambda x: int(x / 2), map(sum, zip(color1, color2))))
+
+
 def make_svg_report(log, global_max, out=sys.stdout):
     """
     :param log: parsed log for a particular year
@@ -130,13 +139,6 @@ def make_svg_report(log, global_max, out=sys.stdout):
     :param global_max: global maximum of the number of commits at any given day
     :type global_max: int
     """
-
-    def average_colors(color1, color2):
-        """
-        :param color1: RGB tuple
-        :param color2: RGB tuple
-        """
-        return map(lambda x: int(x / 2), map(sum, zip(color1, color2)))
 
     def make_colorcode(color):
         """
@@ -182,7 +184,7 @@ def make_svg_report(log, global_max, out=sys.stdout):
             color_others = (238, 238 - density_others * 180, 238 - density_others * 140)
 
             out.write('<rect class="day" width="10px" height="10px" y="%d" style="fill: #%s"/>' \
-                % (day * 12, make_colorcode(average_colors(color_mine, color_others))))
+                % (day * 12, make_colorcode(average_color(color_mine, color_others))))
         out.write('</g>')
 
     out.write('</svg>')
