@@ -123,12 +123,21 @@ def sort_by_year(log):
 
 
 def average_color(color1, color2):
-    """
+    """Takes two RGB color tuples to calculate their average.
+
     :param color1: An RGB tuple
     :param color2: An RGB tuple
     :return: An RGB tuple
     """
     return tuple(map(lambda x: int(x / 2), map(sum, zip(color1, color2))))
+
+
+def make_colorcode(color):
+    """Makes a hexadecimal string representation of a color tuple.
+
+    :param color: An RGB tuple
+    """
+    return '%02x%02x%02x' % color
 
 
 def make_svg_report(log, global_max, out=sys.stdout):
@@ -139,12 +148,6 @@ def make_svg_report(log, global_max, out=sys.stdout):
     :param global_max: global maximum of the number of commits at any given day
     :type global_max: int
     """
-
-    def make_colorcode(color):
-        """
-        :param color: RGB tuple
-        """
-        return '%02x%02x%02x' % tuple(color)
 
     out.write('<?xml version="1.0" encoding="utf-8"?>\n')
     out.write('<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd" [\n')

@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from gitstats import average_color, generate_git_log, parse_log_row, \
-    process_log, sort_by_year
+from gitstats import average_color, generate_git_log, make_colorcode, \
+    parse_log_row, process_log, sort_by_year
 
 
 def validate_log_row(columns):
@@ -74,3 +74,11 @@ def test_average_color():
     assert (127, 127, 0) == average_color(red, green)
     assert (127, 0, 127) == average_color(red, blue)
     assert (0, 127, 127) == average_color(green, blue)
+
+
+def test_make_colorcode():
+    """Ensures make_colorcode() works as intended."""
+    assert '000000' == make_colorcode((0, 0, 0))
+    assert 'ff0000' == make_colorcode((255, 0, 0))
+    assert '00ff00' == make_colorcode((0, 255, 0))
+    assert '0000ff' == make_colorcode((0, 0, 255))
