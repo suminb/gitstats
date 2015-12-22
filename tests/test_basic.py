@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from gitstats import generate_git_log, parse_log_row, sort_by_year
+from gitstats import generate_git_log, parse_log_row, process_log, \
+    sort_by_year
 
 
 def validate_log_row(columns):
@@ -51,3 +52,15 @@ def test_sort_by_year():
     for year in (2013, 2015):
         for row in sorted_logs[year]:
             validate_log_row(row)
+
+
+def test_process_log():
+    """Ensures process_log() works as intended."""
+
+    # Extract logs for the current repository
+    logs = generate_git_log('.')
+    logs2013 = process_log(logs, 2013)
+    assert logs2013['year'] == 2013
+    assert logs2013['daily_commits_mine']
+    assert logs2013['daily_commits_others'] == {}
+    assert logs2013['max_commits'] > 0
