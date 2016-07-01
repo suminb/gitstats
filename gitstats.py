@@ -1,7 +1,3 @@
-__author__ = 'Sumin Byeon'
-__email__ = 'suminb@gmail.com'
-__version__ = '0.1.2'
-
 import subprocess
 import os
 # import StringIO
@@ -10,6 +6,11 @@ import logging
 
 import click
 from dateutil.parser import parse as parse_datetime
+
+
+__author__ = 'Sumin Byeon'
+__email__ = 'suminb@gmail.com'
+__version__ = '0.1.2'
 
 logger = logging.getLogger('gitstat')
 #handler = logging.FileHandler('gitstat.log')
