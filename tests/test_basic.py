@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from gitstats import average_color, generate_git_log, make_colorcode, \
+from gitstats.utils import average_color, generate_git_log, make_colorcode, \
     parse_log_row, process_log, sort_by_year
 
 
