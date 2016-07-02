@@ -3,7 +3,7 @@ import logging
 
 __author__ = 'Sumin Byeon'
 __email__ = 'suminb@gmail.com'
-__version__ = '0.1.2'
+__version__ = '0.2.0'
 
 
 logger = logging.getLogger('gitstats')
