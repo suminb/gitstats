@@ -1,23 +1,9 @@
-import subprocess
 import os
-# import StringIO
+import subprocess
 import sys
-import logging
 
-import click
 from dateutil.parser import parse as parse_datetime
-
-
-__author__ = 'Sumin Byeon'
-__email__ = 'suminb@gmail.com'
-__version__ = '0.1.2'
-
-logger = logging.getLogger('gitstat')
-#handler = logging.FileHandler('gitstat.log')
-handler = logging.StreamHandler(sys.stderr)
-handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
-logger.addHandler(handler)
-logger.setLevel(logging.DEBUG)
+from gitstats import __email__, logger
 
 
 def discover_repositories(root_path):
@@ -70,6 +56,7 @@ def process_log(logs, year):
         if timetuple.tm_year == year:
             key = timetuple.tm_yday
 
+            # TODO: Make it more general...
             is_mine = email == __email__
 
             if is_mine:
@@ -193,42 +180,3 @@ def make_svg_report(log, global_max, out=sys.stdout):
 
     out.write('</svg>')
 
-
-@click.group()
-def cli():
-    pass
-
-
-@cli.command()
-@click.argument('path', type=click.Path(exists=True))
-@click.option('--year', type=str, help='Specify a year or \'all\'')
-@click.option('--out')
-def analyze(path, year, out):
-    repositories = discover_repositories(os.path.expanduser(path))
-
-    logs = []
-    for repo in repositories:
-        logs += generate_git_log(repo)
-
-    log_by_year = sort_by_year(logs)
-
-    max_commits = []
-    for y in log_by_year:
-        data = process_log(log_by_year[y], y)
-        max_commits.append(data['max_commits'])
-
-    if not year:
-        year = y
-    else:
-        year = int(year)
-    global_max = max(max_commits)
-    processed_logs = process_log(log_by_year[year], year)
-    logger.info('Generating report for year {}'.format(year))
-    if out:
-        with open(out, 'w') as fout:
-            make_svg_report(processed_logs, global_max, fout)
-    else:
-        make_svg_report(processed_logs, global_max)
-
-if __name__ == '__main__':
-    cli()
