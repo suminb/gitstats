@@ -7,15 +7,14 @@ import logging
 import click
 from dateutil.parser import parse as parse_datetime
 
+from gitstats import __email__
 
-__author__ = 'Sumin Byeon'
-__email__ = 'suminb@gmail.com'
-__version__ = '0.1.2'
 
 logger = logging.getLogger('gitstat')
-#handler = logging.FileHandler('gitstat.log')
+# handler = logging.FileHandler('gitstat.log')
 handler = logging.StreamHandler(sys.stderr)
-handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+handler.setFormatter(
+    logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
@@ -70,6 +69,7 @@ def process_log(logs, year):
         if timetuple.tm_year == year:
             key = timetuple.tm_yday
 
+            # TODO: Make it more general...
             is_mine = email == __email__
 
             if is_mine:
