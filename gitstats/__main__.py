@@ -17,7 +17,8 @@ def cli():
 @cli.command()
 @click.argument('path', type=click.Path(exists=True))
 @click.option('--year', type=str, help='Specify a year or \'all\'')
-def analyze(path, year):
+@click.option('--email', help='My email address', multiple=True, required=True)
+def analyze(path, year, email):
     repositories = discover_repositories(os.path.expanduser(path))
 
     gitlogs = []
@@ -31,7 +32,7 @@ def analyze(path, year):
 
     max_commits = []
     for y in gitlog_by_year:
-        data = process_log(gitlog_by_year[y], y)
+        data = process_log(gitlog_by_year[y], y, email)
         max_commits.append(data['max_commits'])
 
     if not year:
@@ -47,7 +48,7 @@ def analyze(path, year):
     else:
         year = int(year)
     global_max = max(max_commits)
-    processed_logs = process_log(gitlog_by_year[year], year)
+    processed_logs = process_log(gitlog_by_year[year], year, email)
 
     log.info('Generating report for year {}'.format(year))
     make_svg_report(processed_logs, global_max)

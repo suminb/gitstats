@@ -3,7 +3,7 @@ import subprocess
 import sys
 
 from dateutil.parser import parse as parse_datetime
-from gitstats import __email__, log
+from gitstats import log
 
 
 def discover_repositories(root_path):
@@ -42,13 +42,16 @@ def generate_git_log(path, format='format:%an|%ae|%ad'):
     return [parse_log_row(row) for row in log_rows.strip().split('\n')]
 
 
-def process_log(gitlogs, year):
+def process_log(gitlogs, year, my_emails):
     """Filters out git logs by the given year.
 
     :param gitlogs: A list of (name, email, datetime) tuples
     :type gitlogs: list
 
     :type year: int
+
+    :param my_emails: A list of email addresses
+    :type my_emails: list
 
     :return:
         A dictionary containing information required to draw a commit graph.
@@ -63,8 +66,7 @@ def process_log(gitlogs, year):
         if timetuple.tm_year == year:
             key = timetuple.tm_yday
 
-            # TODO: Make it more general...
-            is_mine = email == __email__
+            is_mine = email in my_emails
 
             if is_mine:
                 if key not in daily_commits_mine:
