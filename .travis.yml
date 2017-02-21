@@ -14,7 +14,7 @@ before_script:
 
 script:
   - export PYTHONPATH=$PYTHONPATH:.
-  - py.test --cov gitstats --cov-report term-missing --durations=10
+  - py.test -v --cov gitstats --cov-report term-missing --durations=10
 
 after_success:
 - coveralls
