@@ -3,7 +3,7 @@ import os
 
 import click
 
-from gitstats import logger
+from gitstats import log
 from gitstats.utils import (
     discover_repositories, generate_git_log, make_svg_report, process_log,
     sort_by_year)
@@ -25,7 +25,7 @@ def analyze(path, year):
         try:
             gitlogs += generate_git_log(repo)
         except RuntimeError:
-            logger.warn('Not able to generate logs for {}', path)
+            log.warn('Not able to generate logs for {}', path)
 
     gitlog_by_year = sort_by_year(gitlogs)
 
@@ -42,14 +42,14 @@ def analyze(path, year):
             # `gitlog_by_year` becomes an empty list and `y` won't have a
             # chance to be assigned. We will refactor this function entirely so
             # we will stick with the following temporary workaround.
-            logger.info('{} appears to be an empty repository', path)
+            log.info('{} appears to be an empty repository', path)
             return
     else:
         year = int(year)
     global_max = max(max_commits)
     processed_logs = process_log(gitlog_by_year[year], year)
 
-    logger.info('Generating report for year {}'.format(year))
+    log.info('Generating report for year {}'.format(year))
     make_svg_report(processed_logs, global_max)
 
 

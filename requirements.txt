@@ -1,5 +1,6 @@
 click
 python-dateutil
+logbook>=1.0.0
 pytest
 pytest-cov
 coveralls

@@ -3,7 +3,7 @@ import subprocess
 import sys
 
 from dateutil.parser import parse as parse_datetime
-from gitstats import __email__, logger
+from gitstats import __email__, log
 
 
 def discover_repositories(root_path):
@@ -14,7 +14,7 @@ def discover_repositories(root_path):
     for root, dirs, files in os.walk(root_path):
         if os.path.exists(os.path.join(root, '.git')) and \
                 not os.path.exists(os.path.join(root, '.exclude')):
-            logger.info('Git repository discovered: {}'.format(root))
+            log.info('Git repository discovered: {}'.format(root))
             repositories.append(root)
 
     return repositories
@@ -31,7 +31,7 @@ def generate_git_log(path, format='format:%an|%ae|%ad'):
     """
     abs_path = os.path.abspath(path)
 
-    logger.info('Analyzing %s' % abs_path)
+    log.info('Analyzing %s' % abs_path)
     command = ['git', 'log', '--pretty={}'.format(format)]
     try:
         log_rows = subprocess.check_output(
