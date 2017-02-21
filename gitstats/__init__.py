@@ -3,7 +3,7 @@ import logging
 
 __author__ = 'Sumin Byeon'
 __email__ = 'suminb@gmail.com'
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 
 # TODO: Name the following variable as `log`
