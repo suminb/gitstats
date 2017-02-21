@@ -36,7 +36,15 @@ def analyze(path, year, out):
         max_commits.append(data['max_commits'])
 
     if not year:
-        year = y
+        try:
+            year = y
+        except NameError:
+            # When running `generate_git_log()` for an empty repository,
+            # `log_by_year` becomes an empty list and `y` won't have a chance
+            # to be assigned. We will refactor this function entirely so we
+            # will stick with the following temporary workaround.
+            logger.info('{} appears to be an empty repository', path)
+            return
     else:
         year = int(year)
     global_max = max(max_commits)
