@@ -32,9 +32,12 @@ def generate_git_log(path, format='format:%an|%ae|%ad'):
     abs_path = os.path.abspath(path)
 
     logger.info('Analyzing %s' % abs_path)
-    log_rows = subprocess.check_output(
-        ['git', 'log', '--pretty={}'.format(format)],
-        cwd=abs_path).decode('utf-8')
+    command = ['git', 'log', '--pretty={}'.format(format)]
+    try:
+        log_rows = subprocess.check_output(
+            command, cwd=abs_path).decode('utf-8')
+    except subprocess.CalledProcessError:
+        raise RuntimeError('Git command failed: {}'.format(command))
 
     return [parse_log_row(row) for row in log_rows.strip().split('\n')]
 

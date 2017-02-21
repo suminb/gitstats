@@ -23,7 +23,10 @@ def analyze(path, year, out):
 
     logs = []
     for repo in repositories:
-        logs += generate_git_log(repo)
+        try:
+            logs += generate_git_log(repo)
+        except RuntimeError:
+            logger.warn('Not able to generate logs for {}', repo)
 
     log_by_year = sort_by_year(logs)
 
