@@ -144,12 +144,22 @@ def make_svg_report(log, global_max, out=sys.stdout):
     :type global_max: int
     """
 
-    out.write('<?xml version="1.0" encoding="utf-8"?>\n')
-    out.write('<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd" [\n')
-    out.write('  <!ENTITY st0 "fill-rule:evenodd;clip-rule:evenodd;fill:#000000;">\n')
-    out.write('  <!ENTITY st1 "fill:#000000;">\n')
-    out.write(']>\n')
-    out.write('<svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="667px" height="107px" viewBox="-10 -10 667 107" style="enable-background:new 0 0 667 107;" xml:space="preserve">\n')
+    svg_epilogue = """
+    <?xml version="1.0" encoding="utf-8"?>
+    <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN"
+      "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd" [
+      <!ENTITY st0 "fill-rule:evenodd;clip-rule:evenodd;fill:#000000;">
+      <!ENTITY st1 "fill:#000000;">
+    ]>
+    <svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+      xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+      width="667px" height="107px"
+      viewBox="-10 -10 667 107"
+      style="enable-background:new 0 0 667 107;"
+      xml:space="preserve">
+    """.strip()
+
+    out.write(svg_epilogue)
 
     daily_commits_mine = log['daily_commits_mine']
     daily_commits_others = log['daily_commits_others']
@@ -178,12 +188,21 @@ def make_svg_report(log, global_max, out=sys.stdout):
             density_others = (count_others + density_offset) / denominator \
                 if count_others > 0 else 0.0
 
-            color_mine = (238 - density_mine * 180, 238 - density_mine * 140, 238)
-            color_others = (238, 238 - density_others * 180, 238 - density_others * 140)
+            color_mine = (
+                238 - density_mine * 180,
+                238 - density_mine * 140,
+                238)
+            color_others = (
+                238,
+                238 - density_others * 180,
+                238 - density_others * 140)
 
-            out.write('<rect class="day" width="10px" height="10px" y="%d" style="fill: #%s"/>' \
-                % (day * 12, make_colorcode(average_color(color_mine, color_others))))
+            rect = """
+            <rect class="day" width="10px" height="10px" y="%d"
+              style="fill: #%s"/>
+            """ % (day * 12,
+                   make_colorcode(average_color(color_mine, color_others)))
+            out.write(rect.strip())
         out.write('</g>')
 
     out.write('</svg>')
-
