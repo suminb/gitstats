@@ -26,7 +26,7 @@ def analyze(path, year, out):
         try:
             logs += generate_git_log(repo)
         except RuntimeError:
-            logger.warn('Not able to generate logs for {}', repo)
+            logger.warn('Not able to generate logs for {}', path)
 
     log_by_year = sort_by_year(logs)
 
@@ -55,6 +55,7 @@ def analyze(path, year, out):
             make_svg_report(processed_logs, global_max, fout)
     else:
         make_svg_report(processed_logs, global_max)
+
 
 if __name__ == '__main__':
     cli()
