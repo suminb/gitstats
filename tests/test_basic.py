@@ -57,9 +57,11 @@ def test_sort_by_year():
 def test_process_log():
     """Ensures process_log() works as intended."""
 
+    from gitstats import __email__
+
     # Extract logs for the current repository
     logs = generate_git_log('.')
-    logs2013 = process_log(logs, 2013)
+    logs2013 = process_log(logs, 2013, [__email__])
     assert logs2013['year'] == 2013
     assert logs2013['daily_commits_mine']
     assert logs2013['daily_commits_others'] == {}
