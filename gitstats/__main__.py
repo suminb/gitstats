@@ -23,7 +23,10 @@ def analyze(path, year, out):
 
     logs = []
     for repo in repositories:
-        logs += generate_git_log(repo)
+        try:
+            logs += generate_git_log(repo)
+        except RuntimeError:
+            logger.warn('Not able to generate logs for {}', path)
 
     log_by_year = sort_by_year(logs)
 
@@ -33,7 +36,15 @@ def analyze(path, year, out):
         max_commits.append(data['max_commits'])
 
     if not year:
-        year = y
+        try:
+            year = y
+        except NameError:
+            # When running `generate_git_log()` for an empty repository,
+            # `log_by_year` becomes an empty list and `y` won't have a chance
+            # to be assigned. We will refactor this function entirely so we
+            # will stick with the following temporary workaround.
+            logger.info('{} appears to be an empty repository', path)
+            return
     else:
         year = int(year)
     global_max = max(max_commits)
@@ -44,6 +55,7 @@ def analyze(path, year, out):
             make_svg_report(processed_logs, global_max, fout)
     else:
         make_svg_report(processed_logs, global_max)
+
 
 if __name__ == '__main__':
     cli()

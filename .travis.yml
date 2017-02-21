@@ -8,9 +8,13 @@ python:
 install:
   - pip install -r requirements.txt
 
+before_script:
+  - echo "Checking for git version..."
+  - git --version
+
 script:
   - export PYTHONPATH=$PYTHONPATH:.
-  - py.test --cov gitstats --cov-report term-missing --durations=10
+  - py.test -v --cov gitstats --cov-report term-missing --durations=10
 
 after_success:
 - coveralls
