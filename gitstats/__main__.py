@@ -17,8 +17,7 @@ def cli():
 @cli.command()
 @click.argument('path', type=click.Path(exists=True))
 @click.option('--year', type=str, help='Specify a year or \'all\'')
-@click.option('--out')
-def analyze(path, year, out):
+def analyze(path, year):
     repositories = discover_repositories(os.path.expanduser(path))
 
     gitlogs = []
@@ -49,12 +48,9 @@ def analyze(path, year, out):
         year = int(year)
     global_max = max(max_commits)
     processed_logs = process_log(gitlog_by_year[year], year)
+
     logger.info('Generating report for year {}'.format(year))
-    if out:
-        with open(out, 'w') as fout:
-            make_svg_report(processed_logs, global_max, fout)
-    else:
-        make_svg_report(processed_logs, global_max)
+    make_svg_report(processed_logs, global_max)
 
 
 if __name__ == '__main__':
