@@ -23,6 +23,10 @@ def discover_repositories(root_path):
 def generate_git_log(path, format='format:%an|%ae|%ad'):
     """Get the entire commit logs in a raw string for a given repository.
 
+    NOTE: We would like to use the `%aI` format (strict ISO 8601 format) for
+    author dates, but it appears that Git 1.8.4, which is installed on Travis
+    CI by default, does not support it.  So we will fallback to `%ad` for now.
+
     :param path: an absolute or relative path of a git repository
     """
     abs_path = os.path.abspath(path)
