@@ -1,9 +1,16 @@
+from datetime import datetime
 import os
 import subprocess
 import sys
 
 from dateutil.parser import parse as parse_datetime
 from gitstats import log
+
+
+def datetime_handler(d):
+    if isinstance(d, datetime):
+        return d.isoformat()
+    raise TypeError('Unknown type')
 
 
 def discover_repositories(root_path):
