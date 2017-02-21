@@ -42,11 +42,11 @@ def generate_git_log(path, format='format:%an|%ae|%ad'):
     return [parse_log_row(row) for row in log_rows.strip().split('\n')]
 
 
-def process_log(logs, year):
-    """Filters out logs by the given year.
+def process_log(gitlogs, year):
+    """Filters out git logs by the given year.
 
-    :param logs: A list of (name, email, datetime) tuples
-    :type logs: list
+    :param gitlogs: A list of (name, email, datetime) tuples
+    :type gitlogs: list
 
     :type year: int
 
@@ -57,9 +57,9 @@ def process_log(logs, year):
     daily_commits_mine = {}
     daily_commits_others = {}
 
-    for log in logs:
-        email = log[1]
-        timetuple = log[2].timetuple()
+    for gitlog in gitlogs:
+        email = gitlog[1]
+        timetuple = gitlog[2].timetuple()
         if timetuple.tm_year == year:
             key = timetuple.tm_yday
 
@@ -97,13 +97,13 @@ def parse_log_row(row):
     return columns[0], columns[1], parse_datetime(columns[2])
 
 
-def sort_by_year(log):
+def sort_by_year(gitlog):
     """
-    :param log: parsed log
-    :type log: list
+    :param gitlog: parsed gitlog
+    :type gitlog: list
     """
     basket = {}
-    for r in log:
+    for r in gitlog:
         name, email, timestamp = r
 
         timetuple = timestamp.timetuple()
@@ -135,10 +135,10 @@ def make_colorcode(color):
     return '%02x%02x%02x' % color
 
 
-def make_svg_report(log, global_max, out=sys.stdout):
+def make_svg_report(gitlog, global_max, out=sys.stdout):
     """
-    :param log: parsed log for a particular year
-    :type log: dict
+    :param gitlog: parsed gitlog for a particular year
+    :type gitlog: dict
 
     :param global_max: global maximum of the number of commits at any given day
     :type global_max: int
@@ -161,8 +161,8 @@ def make_svg_report(log, global_max, out=sys.stdout):
 
     out.write(svg_epilogue)
 
-    daily_commits_mine = log['daily_commits_mine']
-    daily_commits_others = log['daily_commits_others']
+    daily_commits_mine = gitlog['daily_commits_mine']
+    daily_commits_others = gitlog['daily_commits_others']
 
     # Gives clear distinction between no-commit day and a day with at least one
     # commit

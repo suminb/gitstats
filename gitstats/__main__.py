@@ -21,18 +21,18 @@ def cli():
 def analyze(path, year, out):
     repositories = discover_repositories(os.path.expanduser(path))
 
-    logs = []
+    gitlogs = []
     for repo in repositories:
         try:
-            logs += generate_git_log(repo)
+            gitlogs += generate_git_log(repo)
         except RuntimeError:
             logger.warn('Not able to generate logs for {}', path)
 
-    log_by_year = sort_by_year(logs)
+    gitlog_by_year = sort_by_year(gitlogs)
 
     max_commits = []
-    for y in log_by_year:
-        data = process_log(log_by_year[y], y)
+    for y in gitlog_by_year:
+        data = process_log(gitlog_by_year[y], y)
         max_commits.append(data['max_commits'])
 
     if not year:
@@ -40,15 +40,15 @@ def analyze(path, year, out):
             year = y
         except NameError:
             # When running `generate_git_log()` for an empty repository,
-            # `log_by_year` becomes an empty list and `y` won't have a chance
-            # to be assigned. We will refactor this function entirely so we
-            # will stick with the following temporary workaround.
+            # `gitlog_by_year` becomes an empty list and `y` won't have a
+            # chance to be assigned. We will refactor this function entirely so
+            # we will stick with the following temporary workaround.
             logger.info('{} appears to be an empty repository', path)
             return
     else:
         year = int(year)
     global_max = max(max_commits)
-    processed_logs = process_log(log_by_year[year], year)
+    processed_logs = process_log(gitlog_by_year[year], year)
     logger.info('Generating report for year {}'.format(year))
     if out:
         with open(out, 'w') as fout:
