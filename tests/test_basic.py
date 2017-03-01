@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from gitstats.utils import average_color, generate_git_log, make_colorcode, \
-    parse_log_row, process_log, sort_by_year
+from gitstats.utils import average_color, generate_git_log, get_annual_data, \
+    make_colorcode, parse_log_row, sort_by_year
 
 
 def validate_log_row(columns):
@@ -54,14 +54,14 @@ def test_sort_by_year():
             validate_log_row(row)
 
 
-def test_process_log():
-    """Ensures process_log() works as intended."""
+def test_get_annual_data():
+    """Ensures get_annual_data() works as intended."""
 
     from gitstats import __email__
 
     # Extract logs for the current repository
     logs = generate_git_log('.')
-    logs2013 = process_log(logs, 2013, [__email__])
+    logs2013 = get_annual_data(logs, 2013, [__email__])
     assert logs2013['year'] == 2013
     assert logs2013['daily_commits_mine']
     assert logs2013['daily_commits_others'] == {}
