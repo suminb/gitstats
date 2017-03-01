@@ -1,9 +1,16 @@
+from datetime import datetime
 import os
 import subprocess
 import sys
 
 from dateutil.parser import parse as parse_datetime
 from gitstats import log
+
+
+def datetime_handler(d):
+    if isinstance(d, datetime):
+        return d.isoformat()
+    raise TypeError('Unknown type')
 
 
 def discover_repositories(root_path):
@@ -42,7 +49,7 @@ def generate_git_log(path, format='format:%an|%ae|%ad'):
     return [parse_log_row(row) for row in log_rows.strip().split('\n')]
 
 
-def process_log(gitlogs, year, my_emails):
+def get_annual_data(gitlogs, year, my_emails):
     """Filters out git logs by the given year.
 
     :param gitlogs: A list of (name, email, datetime) tuples
@@ -64,20 +71,20 @@ def process_log(gitlogs, year, my_emails):
         email = gitlog[1]
         timetuple = gitlog[2].timetuple()
         if timetuple.tm_year == year:
-            key = timetuple.tm_yday
+            yday = timetuple.tm_yday
 
             is_mine = email in my_emails
 
             if is_mine:
-                if key not in daily_commits_mine:
-                    daily_commits_mine[key] = 1
+                if yday not in daily_commits_mine:
+                    daily_commits_mine[yday] = 1
                 else:
-                    daily_commits_mine[key] += 1
+                    daily_commits_mine[yday] += 1
             else:
-                if key not in daily_commits_others:
-                    daily_commits_others[key] = 1
+                if yday not in daily_commits_others:
+                    daily_commits_others[yday] = 1
                 else:
-                    daily_commits_others[key] += 1
+                    daily_commits_others[yday] += 1
 
     # Calculate the maximum number of commits
     max_commits = 0
