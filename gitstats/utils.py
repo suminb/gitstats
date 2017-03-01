@@ -1,9 +1,16 @@
+from datetime import datetime
 import os
 import subprocess
 import sys
 
 from dateutil.parser import parse as parse_datetime
-from gitstats import __email__, logger
+from gitstats import log
+
+
+def datetime_handler(d):
+    if isinstance(d, datetime):
+        return d.isoformat()
+    raise TypeError('Unknown type')
 
 
 def discover_repositories(root_path):
@@ -14,7 +21,7 @@ def discover_repositories(root_path):
     for root, dirs, files in os.walk(root_path):
         if os.path.exists(os.path.join(root, '.git')) and \
                 not os.path.exists(os.path.join(root, '.exclude')):
-            logger.info('Git repository discovered: {}'.format(root))
+            log.info('Git repository discovered: {}'.format(root))
             repositories.append(root)
 
     return repositories
@@ -31,7 +38,7 @@ def generate_git_log(path, format='format:%an|%ae|%ad'):
     """
     abs_path = os.path.abspath(path)
 
-    logger.info('Analyzing %s' % abs_path)
+    log.info('Analyzing %s' % abs_path)
     command = ['git', 'log', '--pretty={}'.format(format)]
     try:
         log_rows = subprocess.check_output(
@@ -42,13 +49,16 @@ def generate_git_log(path, format='format:%an|%ae|%ad'):
     return [parse_log_row(row) for row in log_rows.strip().split('\n')]
 
 
-def process_log(logs, year):
-    """Filters out logs by the given year.
+def get_annual_data(gitlogs, year, my_emails):
+    """Filters out git logs by the given year.
 
-    :param logs: A list of (name, email, datetime) tuples
-    :type logs: list
+    :param gitlogs: A list of (name, email, datetime) tuples
+    :type gitlogs: list
 
     :type year: int
+
+    :param my_emails: A list of email addresses
+    :type my_emails: list
 
     :return:
         A dictionary containing information required to draw a commit graph.
@@ -57,25 +67,24 @@ def process_log(logs, year):
     daily_commits_mine = {}
     daily_commits_others = {}
 
-    for log in logs:
-        email = log[1]
-        timetuple = log[2].timetuple()
+    for gitlog in gitlogs:
+        email = gitlog[1]
+        timetuple = gitlog[2].timetuple()
         if timetuple.tm_year == year:
-            key = timetuple.tm_yday
+            yday = timetuple.tm_yday
 
-            # TODO: Make it more general...
-            is_mine = email == __email__
+            is_mine = email in my_emails
 
             if is_mine:
-                if key not in daily_commits_mine:
-                    daily_commits_mine[key] = 1
+                if yday not in daily_commits_mine:
+                    daily_commits_mine[yday] = 1
                 else:
-                    daily_commits_mine[key] += 1
+                    daily_commits_mine[yday] += 1
             else:
-                if key not in daily_commits_others:
-                    daily_commits_others[key] = 1
+                if yday not in daily_commits_others:
+                    daily_commits_others[yday] = 1
                 else:
-                    daily_commits_others[key] += 1
+                    daily_commits_others[yday] += 1
 
     # Calculate the maximum number of commits
     max_commits = 0
@@ -97,13 +106,13 @@ def parse_log_row(row):
     return columns[0], columns[1], parse_datetime(columns[2])
 
 
-def sort_by_year(log):
+def sort_by_year(gitlog):
     """
-    :param log: parsed log
-    :type log: list
+    :param gitlog: parsed gitlog
+    :type gitlog: list
     """
     basket = {}
-    for r in log:
+    for r in gitlog:
         name, email, timestamp = r
 
         timetuple = timestamp.timetuple()
@@ -135,10 +144,10 @@ def make_colorcode(color):
     return '%02x%02x%02x' % color
 
 
-def make_svg_report(log, global_max, out=sys.stdout):
+def make_svg_report(gitlog, global_max, out=sys.stdout):
     """
-    :param log: parsed log for a particular year
-    :type log: dict
+    :param gitlog: parsed gitlog for a particular year
+    :type gitlog: dict
 
     :param global_max: global maximum of the number of commits at any given day
     :type global_max: int
@@ -161,8 +170,8 @@ def make_svg_report(log, global_max, out=sys.stdout):
 
     out.write(svg_epilogue)
 
-    daily_commits_mine = log['daily_commits_mine']
-    daily_commits_others = log['daily_commits_others']
+    daily_commits_mine = gitlog['daily_commits_mine']
+    daily_commits_others = gitlog['daily_commits_others']
 
     # Gives clear distinction between no-commit day and a day with at least one
     # commit

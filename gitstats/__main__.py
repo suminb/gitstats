@@ -1,12 +1,13 @@
+import json
 import os
-# import StringIO
 
 import click
+from dateutil.parser import parse as parse_datetime
 
-from gitstats import logger
+from gitstats import log
 from gitstats.utils import (
-    discover_repositories, generate_git_log, make_svg_report, process_log,
-    sort_by_year)
+    datetime_handler, discover_repositories, generate_git_log, make_svg_report,
+    get_annual_data, sort_by_year)
 
 
 @click.group()
@@ -16,45 +17,40 @@ def cli():
 
 @cli.command()
 @click.argument('path', type=click.Path(exists=True))
-@click.option('--year', type=str, help='Specify a year or \'all\'')
-@click.option('--out')
-def analyze(path, year, out):
+def analyze(path):
+    """Analyzes Git repositories to generate a report in JSON format."""
+
     repositories = discover_repositories(os.path.expanduser(path))
 
-    logs = []
+    gitlogs = []
     for repo in repositories:
         try:
-            logs += generate_git_log(repo)
+            gitlogs += generate_git_log(repo)
         except RuntimeError:
-            logger.warn('Not able to generate logs for {}', path)
+            log.warn('Not able to generate logs for {}', path)
 
-    log_by_year = sort_by_year(logs)
+    print(json.dumps(gitlogs, default=datetime_handler))
 
-    max_commits = []
-    for y in log_by_year:
-        data = process_log(log_by_year[y], y)
-        max_commits.append(data['max_commits'])
 
-    if not year:
-        try:
-            year = y
-        except NameError:
-            # When running `generate_git_log()` for an empty repository,
-            # `log_by_year` becomes an empty list and `y` won't have a chance
-            # to be assigned. We will refactor this function entirely so we
-            # will stick with the following temporary workaround.
-            logger.info('{} appears to be an empty repository', path)
-            return
-    else:
-        year = int(year)
-    global_max = max(max_commits)
-    processed_logs = process_log(log_by_year[year], year)
-    logger.info('Generating report for year {}'.format(year))
-    if out:
-        with open(out, 'w') as fout:
-            make_svg_report(processed_logs, global_max, fout)
-    else:
-        make_svg_report(processed_logs, global_max)
+@cli.command()
+@click.argument('json_input', type=click.File('r'))
+@click.argument('year', type=int)
+@click.option('--email', help='My email address', multiple=True, required=True)
+def generate_graph(json_input, year, email):
+    """Generates an annual commit graph in .svg format."""
+
+    gitlogs = json.loads(json_input.read())
+    gitlogs = [(x, y, parse_datetime(z)) for x, y, z in gitlogs]
+
+    gitlogs_by_year = sort_by_year(gitlogs)
+    annual_data = {}
+    for y, l in gitlogs_by_year.items():
+        annual_data[y] = get_annual_data(l, y, email)
+
+    global_max = max([x['max_commits'] for x in annual_data.values()])
+
+    log.info('Generating report for year {}', year)
+    make_svg_report(annual_data[year], global_max)
 
 
 if __name__ == '__main__':

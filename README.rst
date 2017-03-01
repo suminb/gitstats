@@ -16,34 +16,31 @@ indicates my own commits whereas the blue indicates your teammates'.
 Installation
 ============
 
-The latest code can be cloned from GitHub as follows:
-
 .. code-block:: console
 
-   git clone https://github.com/suminb/gitstats
-
-We are planning to register our project to PyPi in the near future, so please
-stay tuned. Once the repository has been cloned, ``gitstats`` can be installed
-as follows:
-
-.. code-block:: console
-
-   pip install -e gitstats
+   pip install gitstats
 
 Usage
 =====
 
 Discover all Git repositories in the home directory to generate statistics.
+Here your email address is used to differentiate your commits from others.
 
 .. code-block:: console
 
-    gitstats analyze ~
+    gitstats analyze --email ${your_email} ~
 
 It may be a single Git repository.
 
 .. code-block:: console
 
-    gitstats analyze ~/dev/projectx
+    gitstats analyze --email ${your_email} ~/work/project_x
 
 If you would like to exclude certain repositories, put a ``.exclude`` file in
 each directory you want to exclude from the statistics.
+
+If you have multiple email addresses, you may pass them as follows:
+
+.. code-block:: console
+
+    gitstats analyze --email ${your_email1} --email ${your_email2} ~
