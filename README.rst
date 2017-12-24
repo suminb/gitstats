@@ -23,24 +23,39 @@ Installation
 Usage
 =====
 
-Discover all Git repositories in the home directory to generate statistics.
-Here your email address is used to differentiate your commits from others.
+The following example shows how `gitstats` discovers all Git repositories
+in the home directory to consolidate all commit logs.
+
+Git Repository Analysis
+~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: console
 
-    gitstats analyze --email ${your_email} ~
+    gitstats analyze ~ > gitstats.json
 
-It may be a single Git repository.
+The target directory may be a single repository.
 
 .. code-block:: console
 
-    gitstats analyze --email ${your_email} ~/work/project_x
+    gitstats analyze ~/work/project_x > gitstats.json
 
 If you would like to exclude certain repositories, put a ``.exclude`` file in
-each directory you want to exclude from the statistics.
+each directory you want to exclude from the statistics. Note that the content
+of the file is irrelevant.
+
+Generating Commit Graphs
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+`gitstats` generates annual commit graphs that are similar to what GitHub
+shows on each user's page. However, the major difference is that `gitstats`
+differentiates your commits from others based on your email address(es).
+
+.. code-block:: console
+
+    gitstats generate_graph gitstats.json 2017 --email ${your_email} > 2017.svg
 
 If you have multiple email addresses, you may pass them as follows:
 
 .. code-block:: console
 
-    gitstats analyze --email ${your_email1} --email ${your_email2} ~
+    gitstats generate_graph gitstats.json 2017 --email ${your_email1} --email ${your_email2} > 2017.svg
