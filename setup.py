@@ -28,6 +28,7 @@ setup(
     url='http://github.com/suminb/gitstats',
     license='BSD',
     packages=[],
+    data_files=[('', ['requirements.txt'])],
     install_requires=install_reqs,
     entry_points={
         'console_scripts': [
