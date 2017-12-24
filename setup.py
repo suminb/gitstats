@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from distutils.core import setup
+
 import gitstats
 
 
@@ -10,6 +11,10 @@ def readme():
             return f.read()
     except:
         return '(Could not read from README.rst)'
+
+
+with open('requirements.txt') as fin:
+    install_reqs = fin.readlines()
 
 
 setup(
@@ -23,6 +28,7 @@ setup(
     url='http://github.com/suminb/gitstats',
     license='BSD',
     packages=[],
+    install_requires=install_reqs,
     entry_points={
         'console_scripts': [
             'gitstats = gitstats.__main__:cli'
