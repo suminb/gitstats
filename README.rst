@@ -52,10 +52,10 @@ differentiates your commits from others based on your email address(es).
 
 .. code-block:: console
 
-    gitstats generate_graph gitstats.json 2017 --email ${your_email} > 2017.svg
+    gitstats generate-graph gitstats.json 2017 --email ${your_email} > 2017.svg
 
 If you have multiple email addresses, you may pass them as follows:
 
 .. code-block:: console
 
-    gitstats generate_graph gitstats.json 2017 --email ${your_email1} --email ${your_email2} > 2017.svg
+    gitstats generate-graph gitstats.json 2017 --email ${your_email1} --email ${your_email2} > 2017.svg
